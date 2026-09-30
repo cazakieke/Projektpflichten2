@@ -1,0 +1,1512 @@
+# Projektpflichten - Inspektions-App
+
+Vou criar o app para gerenciar as obrigações do projeto (Projektpflichten) com base nos 5 documentos:
+
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektpflichten - Inspektions-App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #16a085 0%, #27ae60 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 4px solid #27ae60;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 15px;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid #16a085;
+        }
+
+        .form-section h2 {
+            color: #16a085;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="time"],
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #16a085;
+            box-shadow: 0 0 8px rgba(22, 160, 133, 0.3);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .duty-card {
+            background: white;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .duty-card:hover {
+            box-shadow: 0 6px 20px rgba(22, 160, 133, 0.15);
+            border-color: #16a085;
+        }
+
+        .duty-card-header {
+            background: linear-gradient(135deg, #16a085 0%, #27ae60 100%);
+            color: white;
+            padding: 18px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            gap: 15px;
+        }
+
+        .duty-card-header:hover {
+            background: linear-gradient(135deg, #138d75 0%, #229954 100%);
+        }
+
+        .duty-card-header .duty-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .duty-card-header .duty-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .duty-card-header .duty-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .duty-card-header .duty-name {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .duty-card-header .duty-reference {
+            font-size: 11px;
+            opacity: 0.9;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .duty-card-header .duty-id {
+            background: rgba(255,255,255,0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .duty-card-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .duty-card-content.active {
+            display: block;
+        }
+
+        .duty-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .duty-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .duty-section h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .duty-section .description {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            border-left: 3px solid #16a085;
+        }
+
+        .duty-section .nachweis {
+            font-size: 12px;
+            color: #16a085;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="radio"],
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .applicability-box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .status-box {
+            background: #fffef0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #f39c12;
+            margin-bottom: 15px;
+        }
+
+        .action-plan-box {
+            background: #fff5f5;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .action-plan-box.visible {
+            display: block;
+        }
+
+        .evidence-box {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 15px;
+        }
+
+        .item-block {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e1e1e1;
+        }
+
+        .item-block-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #16a085;
+        }
+
+        .item-block-title .phase-badge {
+            background: #16a085;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .item-block-title .phase-badge.ausfuehrung {
+            background: #e67e22;
+        }
+
+        .photo-preview {
+            border: 2px dashed #bdc3c7;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            background: #fafafa;
+            margin-top: 10px;
+        }
+
+        .photo-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+
+        .location-info {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .location-info p {
+            margin: 5px 0;
+            word-break: break-all;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 25px 0;
+        }
+
+        button {
+            padding: 13px 28px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #16a085;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #138d75;
+            box-shadow: 0 4px 12px rgba(22, 160, 133, 0.4);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2980b9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            line-height: 20px;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .close-modal:hover {
+            color: #000;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #16a085, #27ae60);
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #bdc3c7;
+        }
+
+        .summary-table th {
+            background: #16a085;
+            color: white;
+            font-weight: 600;
+        }
+
+        .summary-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.applicable {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.not-applicable {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .status-badge.compliant {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.non-compliant {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.open {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .toggle-icon {
+            display: inline-block;
+            transition: transform 0.3s;
+            font-size: 18px;
+        }
+
+        .duty-card.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #ecf0f1;
+        }
+
+        .stat-card .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #16a085;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .stat-card.compliant .stat-number { color: #27ae60; }
+        .stat-card.non-compliant .stat-number { color: #e74c3c; }
+        .stat-card.open .stat-number { color: #f39c12; }
+        .stat-card.not-applicable .stat-number { color: #95a5a6; }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .duty-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .duty-card-header .duty-id {
+                align-self: flex-end;
+            }
+
+            .summary-table {
+                font-size: 12px;
+            }
+
+            .summary-table th,
+            .summary-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📋 Projektpflichten</h1>
+            <p>SiGeKompass - Baustellen-Pflichten Inspektions- und Überwachungssystem</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <div id="alertMessage" class="alert"></div>
+
+            <!-- Project Information -->
+            <div class="form-section">
+                <h2>📋 Projektinformationen</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="required">Projekt / Bereich</label>
+                        <input type="text" id="projekt" placeholder="z.B. Baustelle ABC">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Revision / Datum</label>
+                        <input type="date" id="revisionDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Bauherr</label>
+                        <input type="text" id="bauherr" placeholder="Name des Bauherrn">
+                    </div>
+                    <div class="form-group">
+                        <label>SiGeKo (Koordinator)</label>
+                        <input type="text" id="sigeko" placeholder="Name des SiGeKo">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="form-section">
+                <h2>📊 Inspektions-Übersicht</h2>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text">
+                        Fortschritt: <span id="progressCount">0</span> / <span id="progressTotal">5</span> 
+                        (<span id="progressPercent">0</span>%)
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card compliant">
+                        <div class="stat-number" id="statCompliant">0</div>
+                        <div class="stat-label">✓ Erfüllt</div>
+                    </div>
+                    <div class="stat-card non-compliant">
+                        <div class="stat-number" id="statNonCompliant">0</div>
+                        <div class="stat-label">✗ Nicht erfüllt</div>
+                    </div>
+                    <div class="stat-card open">
+                        <div class="stat-number" id="statOpen">0</div>
+                        <div class="stat-label">⏳ Offen</div>
+                    </div>
+                    <div class="stat-card not-applicable">
+                        <div class="stat-number" id="statNotApplicable">0</div>
+                        <div class="stat-label">— N/A</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Duties Container -->
+            <div class="form-section">
+                <h2>📄 Pflicht-Checklisten</h2>
+                <div id="dutiesContainer"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="btn-container">
+                <button class="btn-primary" onclick="saveDraft()">💾 Als Entwurf speichern</button>
+                <button class="btn-success" onclick="submitForm()">✓ Bericht einreichen</button>
+                <button class="btn-info" onclick="openSummary()">📊 Zusammenfassung</button>
+                <button class="btn-secondary" onclick="resetForm()">↺ Zurücksetzen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Modal -->
+    <div id="summaryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>📊 Inspektions-Zusammenfassung</span>
+                <button class="close-modal" onclick="closeSummary()">&times;</button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="summaryProgressBar" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    Gesamt-Fortschritt: <span id="summaryProgress">0</span>%
+                </div>
+            </div>
+
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Pflicht</th>
+                        <th>Anwendbar</th>
+                        <th>Planung</th>
+                        <th>Ausführung</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryTableBody">
+                </tbody>
+            </table>
+
+            <div class="btn-container" style="margin-top: 20px;">
+                <button class="btn-primary" onclick="exportPDF()">📄 Als PDF exportieren</button>
+                <button class="btn-secondary" onclick="closeSummary()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Duty definitions
+        const DUTIES = [
+            {
+                id: 'coordinator',
+                icon: '👤',
+                title: 'SiGeKo-Bestellung',
+                reference: '§3 BaustellV / RAB 30',
+                dokumentzuordnung: 'SiGeKo-Bestellung · Projektakte',
+                items: [
+                    {
+                        id: '01',
+                        phase: 'Planung',
+                        title: 'Bestellung und geeignete Personen dokumentiert?',
+                        description: 'Aufgaben, Bauphase, Zuständigkeiten und Qualifikationsnachweise mit der konkreten Bauaufgabe vergleichen.',
+                        nachweis: 'Bestellung / Vertragsbezug und Eignungsnachweise'
+                    }
+                ]
+            },
+            {
+                id: 'plan',
+                icon: '📐',
+                title: 'SiGePlan',
+                reference: '§2 Abs.3 BaustellV / RAB 31',
+                dokumentzuordnung: 'SiGePlan · Projektakte',
+                items: [
+                    {
+                        id: '01',
+                        phase: 'Planung',
+                        title: 'SiGePlan vor Einrichtung vorbereitet?',
+                        description: 'Arbeitsabläufe, gegenseitige Gefahren, Ort/Zeit, Schutzmaßnahmen und Bestimmungen für alle aktiven Gewerke abgleichen.',
+                        nachweis: 'Freigegebene Planrevision und Verteilung'
+                    }
+                ]
+            },
+            {
+                id: 'notification',
+                icon: '📢',
+                title: 'Vorankündigung',
+                reference: '§2 Abs.2 BaustellV / Anhang I',
+                dokumentzuordnung: 'Vorankündigung · Projektakte',
+                items: [
+                    {
+                        id: '01',
+                        phase: 'Planung',
+                        title: 'Vorankündigung vollständig und rechtzeitig vorgesehen?',
+                        description: 'Anhang-I-Daten, zuständige Behörde und Termin spätestens zwei Wochen vor Einrichtung prüfen.',
+                        nachweis: 'Vorankündigung / Behörde / verbindlicher Versandtermin'
+                    },
+                    {
+                        id: '02',
+                        phase: 'Ausführung',
+                        title: 'Versand und Aushang nachgewiesen?',
+                        description: 'Tatsächlichen Zugang bei der zuständigen Behörde, Frist und sichtbaren Aushang belegen; Änderungen nachhalten.',
+                        nachweis: 'Versand-/Zugangsbeleg und Aushangkontrolle'
+                    }
+                ]
+            },
+            {
+                id: 'future',
+                icon: '🔮',
+                title: 'Unterlage für spätere Arbeiten',
+                reference: '§3 Abs.2 Nr.3 BaustellV / RAB 32',
+                dokumentzuordnung: 'Unterlage für spätere Arbeiten · Projektakte',
+                items: [
+                    {
+                        id: '01',
+                        phase: 'Planung',
+                        title: 'Unterlage bauteilbezogen zusammenstellen?',
+                        description: 'Spätere Arbeiten, Gefährdungen, sichere Zugänge, Schutzvorrichtungen und zugehörige Pläne erfassen.',
+                        nachweis: 'Unterlage / Bestandspläne / Empfänger'
+                    }
+                ]
+            },
+            {
+                id: 'instruction',
+                icon: '📖',
+                title: 'Unterrichtung',
+                reference: '§2 Abs.4 BaustellV',
+                dokumentzuordnung: 'Unterrichtung · Projektakte',
+                items: [
+                    {
+                        id: '01',
+                        phase: 'Planung',
+                        title: 'Arbeitgeber über örtliche Umstände unterrichten?',
+                        description: 'Bei einem Arbeitgeber die besonderen Gefahren und betrieblichen Wechselwirkungen zusammenstellen; Unterrichtung vor Einrichtung organisieren.',
+                        nachweis: 'Unterrichtungsunterlage und Empfangsweg'
+                    },
+                    {
+                        id: '02',
+                        phase: 'Ausführung',
+                        title: 'Unterrichtung tatsächlich übergeben?',
+                        description: 'Datum, Empfänger und übergebene Revision vor Einrichtung der Baustelle dokumentieren.',
+                        nachweis: 'Empfangsbestätigung'
+                    }
+                ]
+            }
+        ];
+
+        let dutyData = {};
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', function() {
+            setCurrentDate();
+            initializeDuties();
+            loadDraftFromStorage();
+        });
+
+        function setCurrentDate() {
+            document.getElementById('revisionDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function initializeDuties() {
+            DUTIES.forEach(duty => {
+                dutyData[duty.id] = {
+                    applicable: null,
+                    reasoning: '',
+                    items: {}
+                };
+                duty.items.forEach(item => {
+                    dutyData[duty.id].items[item.id] = {
+                        status: null,
+                        evidence: '',
+                        responsible: '',
+                        deadline: '',
+                        checkedDate: '',
+                        actionPlan: '',
+                        actionResponsible: '',
+                        actionDeadline: '',
+                        photoDate: '',
+                        photoTime: '',
+                        locationDescription: '',
+                        latitude: '',
+                        longitude: '',
+                        accuracy: ''
+                    };
+                });
+            });
+
+            renderDuties();
+            updateProgressBar();
+        }
+
+        function renderDuties() {
+            const container = document.getElementById('dutiesContainer');
+            container.innerHTML = '';
+
+            DUTIES.forEach(duty => {
+                container.innerHTML += createDutyCard(duty);
+            });
+
+            // Add event listeners for headers
+            document.querySelectorAll('.duty-card-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const card = this.closest('.duty-card');
+                    const content = card.querySelector('.duty-card-content');
+                    card.classList.toggle('expanded');
+                    content.classList.toggle('active');
+                });
+            });
+        }
+
+        function createDutyCard(duty) {
+            let itemsHTML = '';
+            duty.items.forEach(item => {
+                itemsHTML += createItemBlock(duty.id, item);
+            });
+
+            return `
+            <div class="duty-card" id="duty-${duty.id}">
+                <div class="duty-card-header">
+                    <div class="duty-info">
+                        <div class="duty-icon">${duty.icon}</div>
+                        <div class="duty-title">
+                            <span class="duty-name">${duty.title}</span>
+                            <span class="duty-reference">Bezug: ${duty.reference}</span>
+                        </div>
+                    </div>
+                    <span class="duty-id">DUTY-${duty.id.toUpperCase()}</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+
+                <div class="duty-card-content">
+                    <!-- Applicability Section -->
+                    <div class="duty-section">
+                        <h4>🎯 Anwendbarkeit</h4>
+                        <div class="applicability-box">
+                            <p style="margin-bottom: 12px; font-size: 13px;">
+                                <strong>Aktivierung:</strong> Automatisch aus der gesetzlichen Entscheidungsroute.<br>
+                                <strong>Dokumentzuordnung:</strong> ${duty.dokumentzuordnung}
+                            </p>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="radio" id="applicable-${duty.id}-yes" name="applicable-${duty.id}" 
+                                           value="ja" onchange="handleApplicability('${duty.id}')">
+                                    <label for="applicable-${duty.id}-yes">Ja</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="radio" id="applicable-${duty.id}-no" name="applicable-${duty.id}" 
+                                           value="nein" onchange="handleApplicability('${duty.id}')">
+                                    <label for="applicable-${duty.id}-no">Nein</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="radio" id="applicable-${duty.id}-unclear" name="applicable-${duty.id}" 
+                                           value="zu_klaren" onchange="handleApplicability('${duty.id}')">
+                                    <label for="applicable-${duty.id}-unclear">Zu klären</label>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label>Begründung</label>
+                                <textarea id="reasoning-${duty.id}" placeholder="Begründung eingeben..." 
+                                          onchange="dutyData['${duty.id}'].reasoning = this.value"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items Container (visible when applicable) -->
+                    <div id="items-${duty.id}" style="display: none;">
+                        ${itemsHTML}
+                    </div>
+
+                    <!-- Prüfung / Freigabe -->
+                    <div class="duty-section" id="approval-${duty.id}" style="display: none;">
+                        <h4>✍️ Prüfung / Freigabe</h4>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Prüfung / Freigabe</label>
+                                <input type="text" id="approval-name-${duty.id}" placeholder="Name des Prüfers">
+                            </div>
+                            <div class="form-group">
+                                <label>Datum / Unterschrift</label>
+                                <input type="date" id="approval-date-${duty.id}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function createItemBlock(dutyId, item) {
+            const phaseClass = item.phase === 'Ausführung' ? 'ausfuehrung' : '';
+            
+            return `
+            <div class="item-block">
+                <div class="item-block-title">
+                    <span>${item.id} - ${item.title}</span>
+                    <span class="phase-badge ${phaseClass}">${item.phase}</span>
+                </div>
+
+                <div class="description">${item.description}</div>
+                <div class="nachweis"><strong>Nachweis:</strong> ${item.nachweis}</div>
+
+                <!-- Status -->
+                <div class="status-box">
+                    <h4 style="margin-bottom: 10px;">Erfüllungsstatus</h4>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="radio" id="status-${dutyId}-${item.id}-open" name="status-${dutyId}-${item.id}" 
+                                   value="offen" onchange="handleStatusChange('${dutyId}', '${item.id}', this.value)">
+                            <label for="status-${dutyId}-${item.id}-open">⏳ Offen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="radio" id="status-${dutyId}-${item.id}-fulfilled" name="status-${dutyId}-${item.id}" 
+                                   value="erfüllt" onchange="handleStatusChange('${dutyId}', '${item.id}', this.value)">
+                            <label for="status-${dutyId}-${item.id}-fulfilled">✓ Erfüllt</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="radio" id="status-${dutyId}-${item.id}-not-fulfilled" name="status-${dutyId}-${item.id}" 
+                                   value="nicht_erfüllt" onchange="handleStatusChange('${dutyId}', '${item.id}', this.value)">
+                            <label for="status-${dutyId}-${item.id}-not-fulfilled">✗ Nicht erfüllt</label>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Verantwortlich</label>
+                            <input type="text" id="responsible-${dutyId}-${item.id}" placeholder="Name"
+                                   onchange="dutyData['${dutyId}'].items['${item.id}'].responsible = this.value">
+                        </div>
+                        <div class="form-group">
+                            <label>Frist</label>
+                            <input type="date" id="deadline-${dutyId}-${item.id}"
+                                   onchange="dutyData['${dutyId}'].items['${item.id}'].deadline = this.value">
+                        </div>
+                        <div class="form-group">
+                            <label>Geprüft am</label>
+                            <input type="date" id="checked-${dutyId}-${item.id}"
+                                   onchange="dutyData['${dutyId}'].items['${item.id}'].checkedDate = this.value">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>Nachweis / Ablage / Maßnahmen / Begründung</label>
+                        <textarea id="evidence-${dutyId}-${item.id}" placeholder="Detaillierte Nachweisinformationen..."
+                                  onchange="dutyData['${dutyId}'].items['${item.id}'].evidence = this.value"></textarea>
+                    </div>
+                </div>
+
+                <!-- Action Plan (visible if not fulfilled) -->
+                <div class="action-plan-box" id="actionplan-${dutyId}-${item.id}">
+                    <h4 style="color: #c0392b; margin-bottom: 10px;">⚠️ Maßnahmenplan zur Behebung</h4>
+                    <div class="form-group">
+                        <label class="required">Korrekturmaßnahmen</label>
+                        <textarea id="actionplan-text-${dutyId}-${item.id}" placeholder="Detaillierte Beschreibung der Korrekturmaßnahmen..."
+                                  onchange="dutyData['${dutyId}'].items['${item.id}'].actionPlan = this.value"></textarea>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="required">Verantwortlicher</label>
+                            <input type="text" id="actionplan-resp-${dutyId}-${item.id}" placeholder="Name"
+                                   onchange="dutyData['${dutyId}'].items['${item.id}'].actionResponsible = this.value">
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Fristsetzung</label>
+                            <input type="date" id="actionplan-deadline-${dutyId}-${item.id}"
+                                   onchange="dutyData['${dutyId}'].items['${item.id}'].actionDeadline = this.value">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photo Evidence -->
+                <div class="evidence-box">
+                    <h4 style="color: #2980b9; margin-bottom: 10px;">📸 Fotonachweis und Georeferenzierung</h4>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Aufnahmedatum</label>
+                            <input type="date" id="photo-date-${dutyId}-${item.id}"
+                                   onchange="dutyData['${dutyId}'].items['${item.id}'].photoDate = this.value">
+                        </div>
+                        <div class="form-group">
+                            <label>Aufnahmezeit</label>
+                            <input type="time" id="photo-time-${dutyId}-${item.id}"
+                                   onchange="dutyData['${dutyId}'].items['${item.id}'].photoTime = this.value">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Foto hochladen</label>
+                        <input type="file" id="photo-file-${dutyId}-${item.id}" accept="image/*" 
+                               onchange="handlePhotoUpload(event, '${dutyId}', '${item.id}')">
+                        <div id="photo-preview-${dutyId}-${item.id}" class="photo-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="gps-enabled-${dutyId}-${item.id}" 
+                                   onchange="handleGPSToggle('${dutyId}', '${item.id}')">
+                            GPS-Standort erfassen
+                        </label>
+                    </div>
+
+                    <div id="location-info-${dutyId}-${item.id}" class="location-info" style="display: none;">
+                        <p><strong>Breitengrad:</strong> <span id="latitude-${dutyId}-${item.id}">-</span></p>
+                        <p><strong>Längengrad:</strong> <span id="longitude-${dutyId}-${item.id}">-</span></p>
+                        <p><strong>Genauigkeit:</strong> <span id="accuracy-${dutyId}-${item.id}">-</span> m</p>
+                        <p><strong>Status:</strong> <span id="gps-status-${dutyId}-${item.id}">Erfassung aktiv...</span></p>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>Ortsangabe / Lokalisierungsbeschreibung</label>
+                        <input type="text" id="location-desc-${dutyId}-${item.id}" placeholder="z.B. Baustellenbüro, Bereich Nord"
+                               onchange="dutyData['${dutyId}'].items['${item.id}'].locationDescription = this.value">
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function handleApplicability(dutyId) {
+            const applicable = document.querySelector(`input[name="applicable-${dutyId}"]:checked`)?.value;
+            const itemsSection = document.getElementById(`items-${dutyId}`);
+            const approvalSection = document.getElementById(`approval-${dutyId}`);
+
+            dutyData[dutyId].applicable = applicable;
+
+            if (applicable === 'ja') {
+                itemsSection.style.display = 'block';
+                approvalSection.style.display = 'block';
+            } else {
+                itemsSection.style.display = 'none';
+                approvalSection.style.display = 'none';
+            }
+
+            updateProgressBar();
+            updateStatistics();
+        }
+
+        function handleStatusChange(dutyId, itemId, value) {
+            const actionPlanBox = document.getElementById(`actionplan-${dutyId}-${itemId}`);
+            
+            dutyData[dutyId].items[itemId].status = value;
+
+            if (value === 'nicht_erfüllt') {
+                actionPlanBox.classList.add('visible');
+            } else {
+                actionPlanBox.classList.remove('visible');
+            }
+
+            updateProgressBar();
+            updateStatistics();
+        }
+
+        function handlePhotoUpload(event, dutyId, itemId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById(`photo-preview-${dutyId}-${itemId}`);
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Vorschau"><p style="margin-top:8px; font-size:12px; color:#7f8c8d;">${file.name}</p>`;
+                };
+                reader.readAsDataURL(file);
+
+                const now = new Date();
+                document.getElementById(`photo-date-${dutyId}-${itemId}`).value = now.toISOString().split('T')[0];
+                document.getElementById(`photo-time-${dutyId}-${itemId}`).value = now.toTimeString().slice(0, 5);
+                dutyData[dutyId].items[itemId].photoDate = now.toISOString().split('T')[0];
+                dutyData[dutyId].items[itemId].photoTime = now.toTimeString().slice(0, 5);
+            }
+        }
+
+        function handleGPSToggle(dutyId, itemId) {
+            const checkbox = document.getElementById(`gps-enabled-${dutyId}-${itemId}`);
+            const locationInfo = document.getElementById(`location-info-${dutyId}-${itemId}`);
+
+            if (checkbox.checked) {
+                locationInfo.style.display = 'block';
+                getGPSLocation(dutyId, itemId);
+            } else {
+                locationInfo.style.display = 'none';
+            }
+        }
+
+        function getGPSLocation(dutyId, itemId) {
+            if (navigator.geolocation) {
+                const statusSpan = document.getElementById(`gps-status-${dutyId}-${itemId}`);
+                statusSpan.innerHTML = '⏳ Erfassung läuft...';
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lng = position.coords.longitude.toFixed(6);
+                        const acc = Math.round(position.coords.accuracy);
+
+                        document.getElementById(`latitude-${dutyId}-${itemId}`).textContent = lat;
+                        document.getElementById(`longitude-${dutyId}-${itemId}`).textContent = lng;
+                        document.getElementById(`accuracy-${dutyId}-${itemId}`).textContent = acc;
+                        document.getElementById(`gps-status-${dutyId}-${itemId}`).textContent = '✓ Erfolgreich erfasst';
+
+                        dutyData[dutyId].items[itemId].latitude = lat;
+                        dutyData[dutyId].items[itemId].longitude = lng;
+                        dutyData[dutyId].items[itemId].accuracy = acc;
+                    },
+                    function(error) {
+                        document.getElementById(`gps-status-${dutyId}-${itemId}`).textContent = 
+                            '✗ Fehler: ' + error.message;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                showAlert('Geolokalisierung wird von diesem Browser nicht unterstützt.', 'error');
+            }
+        }
+
+        function updateProgressBar() {
+            let completed = 0;
+            let total = DUTIES.length;
+
+            DUTIES.forEach(duty => {
+                if (dutyData[duty.id].applicable !== null && dutyData[duty.id].applicable !== '') {
+                    completed++;
+                }
+            });
+
+            const percentage = Math.round((completed / total) * 100);
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressCount').textContent = completed;
+            document.getElementById('progressTotal').textContent = total;
+            document.getElementById('progressPercent').textContent = percentage;
+        }
+
+        function updateStatistics() {
+            let compliant = 0, nonCompliant = 0, open = 0, notApplicable = 0;
+
+            DUTIES.forEach(duty => {
+                if (dutyData[duty.id].applicable === 'nein') {
+                    notApplicable++;
+                } else if (dutyData[duty.id].applicable === 'ja') {
+                    let allFulfilled = true;
+                    let hasOpen = false;
+                    let hasNotFulfilled = false;
+                    
+                    duty.items.forEach(item => {
+                        const status = dutyData[duty.id].items[item.id].status;
+                        if (status === 'nicht_erfüllt') hasNotFulfilled = true;
+                        else if (status === 'offen' || !status) hasOpen = true;
+                        else if (status !== 'erfüllt') allFulfilled = false;
+                    });
+
+                    if (hasNotFulfilled) nonCompliant++;
+                    else if (hasOpen) open++;
+                    else if (allFulfilled) compliant++;
+                }
+            });
+
+            document.getElementById('statCompliant').textContent = compliant;
+            document.getElementById('statNonCompliant').textContent = nonCompliant;
+            document.getElementById('statOpen').textContent = open;
+            document.getElementById('statNotApplicable').textContent = notApplicable;
+        }
+
+        function saveDraft() {
+            const projektName = document.getElementById('projekt').value;
+            
+            if (!projektName) {
+                showAlert('Bitte Projekt eingeben!', 'error');
+                return;
+            }
+
+            const formData = {
+                timestamp: new Date().toISOString(),
+                projekt: projektName,
+                revisionDate: document.getElementById('revisionDate').value,
+                bauherr: document.getElementById('bauherr').value,
+                sigeko: document.getElementById('sigeko').value,
+                duties: dutyData
+            };
+
+            localStorage.setItem('projektpflichtenDraft', JSON.stringify(formData));
+            showAlert('Entwurf erfolgreich gespeichert!', 'success');
+        }
+
+        function loadDraftFromStorage() {
+            const draft = localStorage.getItem('projektpflichtenDraft');
+            if (draft) {
+                const formData = JSON.parse(draft);
+                
+                document.getElementById('projekt').value = formData.projekt || '';
+                document.getElementById('revisionDate').value = formData.revisionDate || '';
+                document.getElementById('bauherr').value = formData.bauherr || '';
+                document.getElementById('sigeko').value = formData.sigeko || '';
+
+                if (formData.duties) {
+                    Object.keys(formData.duties).forEach(dutyId => {
+                        if (dutyData[dutyId]) {
+                            dutyData[dutyId] = formData.duties[dutyId];
+                        }
+                    });
+                }
+
+                updateProgressBar();
+                updateStatistics();
+                showAlert('Entwurf wurde geladen!', 'success');
+            }
+        }
+
+        function submitForm() {
+            const projektName = document.getElementById('projekt').value;
+            const bauherr = document.getElementById('bauherr').value;
+
+            if (!projektName || !bauherr) {
+                showAlert('Bitte alle erforderlichen Felder ausfüllen!', 'error');
+                return;
+            }
+
+            const report = generateReport();
+            
+            localStorage.removeItem('projektpflichtenDraft');
+            localStorage.setItem(`projektpflichtenReport_${Date.now()}`, JSON.stringify(report));
+
+            showAlert('Bericht erfolgreich eingereicht! Referenz-ID: ' + Date.now(), 'success');
+
+            setTimeout(() => {
+                resetForm();
+            }, 2500);
+        }
+
+        function generateReport() {
+            return {
+                timestamp: new Date().toISOString(),
+                projekt: document.getElementById('projekt').value,
+                revisionDate: document.getElementById('revisionDate').value,
+                bauherr: document.getElementById('bauherr').value,
+                sigeko: document.getElementById('sigeko').value,
+                duties: dutyData
+            };
+        }
+
+        function openSummary() {
+            const modal = document.getElementById('summaryModal');
+            modal.classList.add('active');
+            updateSummaryTable();
+        }
+
+        function closeSummary() {
+            document.getElementById('summaryModal').classList.remove('active');
+        }
+
+        function updateSummaryTable() {
+            const tbody = document.getElementById('summaryTableBody');
+            tbody.innerHTML = '';
+
+            let completed = 0;
+            const total = DUTIES.length;
+
+            DUTIES.forEach(duty => {
+                const data = dutyData[duty.id];
+                const applicableText = data.applicable === 'ja' ? '✓ Ja' : data.applicable === 'nein' ? '✗ Nein' : data.applicable === 'zu_klaren' ? '⏳ Zu klären' : '-';
+                
+                if (data.applicable) completed++;
+
+                let planungStatus = '-';
+                let ausfuehrungStatus = '-';
+                let actionNeeded = '✓ Nein';
+
+                duty.items.forEach(item => {
+                    const status = data.items[item.id].status;
+                    if (item.phase === 'Planung') planungStatus = status || '-';
+                    if (item.phase === 'Ausführung') ausfuehrungStatus = status || '-';
+                    if (status === 'nicht_erfüllt') actionNeeded = '⚠️ Ja';
+                });
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${duty.icon} ${duty.title}</strong><br><span style="font-size:11px;color:#7f8c8d;">${duty.reference}</span></td>
+                    <td><span class="status-badge ${data.applicable === 'ja' ? 'applicable' : 'not-applicable'}">${applicableText}</span></td>
+                    <td><span class="status-badge ${planungStatus === 'erfüllt' ? 'compliant' : planungStatus === 'nicht_erfüllt' ? 'non-compliant' : 'open'}">${planungStatus}</span></td>
+                    <td>${duty.items.some(i => i.phase === 'Ausführung') ? `<span class="status-badge ${ausfuehrungStatus === 'erfüllt' ? 'compliant' : ausfuehrungStatus === 'nicht_erfüllt' ? 'non-compliant' : 'open'}">${ausfuehrungStatus}</span>` : '<em>N/A</em>'}</td>
+                    <td>${actionNeeded}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            const percentage = Math.round((completed / total) * 100);
+            document.getElementById('summaryProgressBar').style.width = percentage + '%';
+            document.getElementById('summaryProgress').textContent = percentage;
+        }
+
+        function exportPDF() {
+            alert('PDF-Export-Funktion: Diese Funktion erfordert eine PDF-Library wie jsPDF.\n\nFür Produktionsumgebung empfohlen: jsPDF + html2canvas\n\nAlternativ: Drucken-Funktion des Browsers (Strg+P) verwenden und als PDF speichern.');
+            window.print();
+        }
+
+        function resetForm() {
+            if (confirm('Alle Daten wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+                localStorage.removeItem('projektpflichtenDraft');
+                location.reload();
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert active alert-${type}`;
+
+            setTimeout(() => {
+                alertDiv.classList.remove('active');
+            }, 5000);
+        }
+
+        // Auto-save every 60 seconds
+        setInterval(() => {
+            if (document.getElementById('projekt').value) {
+                saveDraft();
+            }
+        }, 60000);
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('summaryModal');
+            if (event.target === modal) {
+                closeSummary();
+            }
+        };
+    </script>
+</body>
+</html>
+```
+
+## 🎯 **Funcionalidades Principais:**
+
+### ✅ **5 Projektpflichten (Obrigações do Projeto):**
+
+1. **👤 SiGeKo-Bestellung** (`DUTY-coordinator`)
+   - §3 BaustellV / RAB 30
+   - 1 Item de Planung
+
+2. **📐 SiGePlan** (`DUTY-plan`)
+   - §2 Abs.3 BaustellV / RAB 31
+   - 1 Item de Planung
+
+3. **📢 Vorankündigung** (`DUTY-notification`)
+   - §2 Abs.2 BaustellV / Anhang I
+   - 2 Items (Planung + Ausführung)
+
+4. **🔮 Unterlage für spätere Arbeiten** (`DUTY-future`)
+   - §3 Abs.2 Nr.3 BaustellV / RAB 32
+   - 1 Item de Planung
+
+5. **📖 Unterrichtung** (`DUTY-instruction`)
+   - §2 Abs.4 BaustellV
+   - 2 Items (Planung + Ausführung)
+
+### 📋 **Estrutura de Cada Obrigação:**
+- **Anwendbarkeit**: Ja/Nein/Zu klären + Begründung
+- **Multiple Items** (dependendo da obrigação)
+- **Status**: Offen/Erfüllt/Nicht erfüllt
+- **Verantwortlicher, Frist, Geprüft am**
+- **Nachweis/Ablage**
+- **Maßnahmenplan** (visível quando nicht erfüllt)
+- **Fotonachweis** com data/hora
+- **GPS-Georeferenzierung**
+- **Prüfung/Freigabe** com assinatura
+
+### 🎨 **Recursos Extras:**
+- 📊 Dashboard com estatísticas em tempo real
+- 💾 Salvamento automático (LocalStorage)
+- 📱 Design responsivo (PC + celular)
+- 🎨 Cores diferenciadas por fase (Planung/Ausführung)
+- 📄 Exportação para PDF (via impressão)
+- ⏰ Auto-save a cada 60 segundos
+- 🔄 Modal de resumo detalhado
+
+Copie o código e salve como `.html` para uso imediato!
